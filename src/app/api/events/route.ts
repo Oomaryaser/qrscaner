@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { USER_COOKIE_NAME } from "@/lib/session";
+import { ADMIN_USER_ID } from "@/lib/admin";
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { randomUUID } from "crypto";
@@ -26,6 +27,9 @@ export async function POST(req: Request) {
     const userId = cookieManager.get(USER_COOKIE_NAME)?.value;
     if (!userId) {
       return NextResponse.json({ error: "مطلوب تسجيل الدخول" }, { status: 401 });
+    }
+    if (userId !== ADMIN_USER_ID) {
+      return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
     }
 
     const { date, time, capacity } = await req.json();

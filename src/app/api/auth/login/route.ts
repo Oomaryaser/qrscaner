@@ -3,33 +3,30 @@ import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { USER_COOKIE_NAME, normalizeUsername } from "@/lib/session";
-import { randomUUID } from "crypto";
+import { USER_COOKIE_NAME } from "@/lib/session";
+import { ADMIN_PASSCODE, ADMIN_USER_ID, ADMIN_USERNAME } from "@/lib/admin";
 
 export async function POST(req: Request) {
   try {
     const { username } = await req.json();
-    if (!username || typeof username !== "string") {
-      return NextResponse.json({ error: "اسم المستخدم مطلوب" }, { status: 400 });
-    }
-    const { norm, display } = normalizeUsername(username);
-    if (!norm) {
-      return NextResponse.json({ error: "اسم غير صالح" }, { status: 400 });
+    const passcode = typeof username === "string" ? username.trim() : "";
+
+    // Only accept the single secret passcode
+    if (passcode !== ADMIN_PASSCODE) {
+      return NextResponse.json({ error: "رمز غير صالح" }, { status: 401 });
     }
 
-    const found = await db.select().from(users).where(eq(users.usernameNorm, norm)).limit(1);
-    let uid: string;
-    if (found.length) {
-      uid = found[0].id;
-    } else {
-      uid = randomUUID();
-      await db.insert(users).values({ id: uid, username: display, usernameNorm: norm });
+    // Ensure admin user exists (id must be a valid UUID per schema)
+    const existing = await db.select().from(users).where(eq(users.id, ADMIN_USER_ID)).limit(1);
+    if (!existing.length) {
+      // usernameNorm must be unique; use the fixed ID to avoid collisions
+      await db.insert(users).values({ id: ADMIN_USER_ID, username: ADMIN_USERNAME, usernameNorm: ADMIN_USER_ID });
     }
 
-    const res = NextResponse.json({ ok: true, userId: uid });
+    const res = NextResponse.json({ ok: true, userId: ADMIN_USER_ID });
     res.cookies.set({
       name: USER_COOKIE_NAME,
-      value: uid,
+      value: ADMIN_USER_ID,
       httpOnly: true,
       sameSite: "lax",
       path: "/",

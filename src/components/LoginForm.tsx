@@ -33,6 +33,7 @@ export default function LoginForm() {
       <div className="space-y-2">
         <label className="block text-sm">رمز المرور</label>
         <input
+          type="password"
           dir="rtl"
           className="w-full border rounded px-3 py-2 bg-transparent"
           placeholder="اكتب رمز المرور"
@@ -47,4 +48,3 @@ export default function LoginForm() {
     </form>
   );
 }
-
