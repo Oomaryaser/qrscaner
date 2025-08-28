@@ -188,28 +188,29 @@ export default async function Home() {
                 ) : (
                     <div className="space-y-4">
                         {myEvents.map((ev, index) => {
-                            const startLocal = new Date(ev.startAtUtc.getTime() + 3 * 60 * 60 * 1000);
-                            const createdLocal = new Date(ev.createdAt.getTime() + 3 * 60 * 60 * 1000);
-                            const startStr = startLocal.toLocaleString("ar", {
+                            const startStr = new Intl.DateTimeFormat("ar", {
                                 year: "numeric",
                                 month: "2-digit",
                                 day: "2-digit",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                                hour12: true
-                            }) + " GMT+3";
-                            const createdStr = createdLocal.toLocaleString("ar", {
+                                hour12: true,
+                                timeZone: "Asia/Baghdad",
+                              }).format(ev.startAtUtc);
+                            const createdStr = new Intl.DateTimeFormat("ar", {
                                 year: "numeric",
                                 month: "2-digit",
                                 day: "2-digit",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                                hour12: true
-                            }) + " GMT+3";
+                                hour12: true,
+                                timeZone: "Asia/Baghdad",
+                              }).format(ev.createdAt);
 
                             const attendancePercentage = ev.capacityMax > 0 ? (ev.attendedCount / ev.capacityMax) * 100 : 0;
-                            const isUpcoming = startLocal.getTime() > Date.now();
-                            const isActive = Math.abs(startLocal.getTime() - Date.now()) < 3 * 60 * 60 * 1000; // within 3 hours
+                            const startMs = ev.startAtUtc.getTime();
+                            const isUpcoming = startMs > Date.now();
+                            const isActive = Math.abs(startMs - Date.now()) < 3 * 60 * 60 * 1000; // within 3 hours
 
                             return (
                                 <div key={ev.id} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-100 p-6 hover-lift transition-all duration-300 animate-slideIn" style={{ animationDelay: `${index * 0.1}s` }}>

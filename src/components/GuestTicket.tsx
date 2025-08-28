@@ -25,19 +25,18 @@ export default function GuestTicket({ eventId }: { eventId: string }) {
   const isWindowOpen = useMemo(() => (showQrFrom ? now >= showQrFrom : false), [showQrFrom, now]);
   const isFull = event ? event.attendedCount >= event.capacityMax : false;
 
-  // Local display string in GMT+3
+  // Local display string in fixed timezone (GMT+3)
   const displayTime = useMemo(() => {
     if (!startAtMs) return "";
-    const ms = startAtMs + 3 * 60 * 60 * 1000;
-    const d = new Date(ms);
-    return d.toLocaleString("ar", {
+    return new Intl.DateTimeFormat("ar", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
-    }) + " GMT+3";
+      timeZone: "Asia/Baghdad",
+    }).format(new Date(startAtMs));
   }, [startAtMs]);
 
   useEffect(() => {
