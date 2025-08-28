@@ -24,9 +24,6 @@ export default async function EventGuestPage({ params }: { params: Promise<{ id:
       <GuestTicket eventId={id} />
       {isOwner ? (
         <div className="pt-2">
-          <Link className="text-blue-600 underline" href={`/e/${id}/scan`}>
-            صفحة مسح QR للمشرف
-          </Link>
         </div>
       ) : null}
     </div>
