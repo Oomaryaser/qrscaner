@@ -11,6 +11,8 @@ create table if not exists users (
 create table if not exists events (
   id uuid primary key,
   owner_id uuid not null references users(id) on delete cascade,
+  name varchar(200) not null default '',
+  phone varchar(30) null,
   start_at_utc timestamptz not null,
   capacity_max integer not null,
   attended_count integer not null default 0,
@@ -22,6 +24,7 @@ create table if not exists tickets (
   event_id uuid not null references events(id) on delete cascade,
   scanned boolean not null default false,
   scanned_at timestamptz null,
+  scan_count integer not null default 0,
   created_at timestamptz not null default now()
 );
 

@@ -7,6 +7,8 @@ function formatDefault() {
 
 export default function CreateEventForm() {
   const def = useMemo(formatDefault, []);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [date, setDate] = useState(def.date);
   const [time, setTime] = useState(def.time);
   const [capacity, setCapacity] = useState<number>(50);
@@ -26,7 +28,7 @@ export default function CreateEventForm() {
       const res = await fetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, time, capacity }),
+        body: JSON.stringify({ date, time, capacity, name, phone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "فشل إنشاء الضيف");
@@ -68,6 +70,42 @@ export default function CreateEventForm() {
 
       <form onSubmit={submit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex items-center space-x-reverse space-x-2">
+                <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 3a7 7 0 100 14 7 7 0 000-14zm0 3a2 2 0 110 4 2 2 0 010-4zm0 6a5 5 0 00-4.546 2.916.75.75 0 101.342.668A3.5 3.5 0 0110 12.5a3.5 3.5 0 013.204 2.084.75.75 0 001.342-.668A5 5 0 0010 12z" />
+                </svg>
+                <span>اسم</span>
+              </div>
+            </label>
+            <input
+              type="text"
+              className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl transition-all duration-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="ادخل اسم"
+              required
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex items-center space-x-reverse space-x-2">
+                <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 5a2 2 0 012-2h2.28a1 1 0 01.948.684l.894 2.683A1 1 0 009.06 7h1.88a1 1 0 01.948 1.316l-.894 2.683A1 1 0 009.94 12H8.06a1 1 0 01-.948-.684l-.894-2.683A1 1 0 005.28 8H4a2 2 0 01-2-2V5z" />
+                </svg>
+                <span>رقم الهاتف (لن يظهر للضيف)</span>
+              </div>
+            </label>
+            <input
+              type="tel"
+              className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl transition-all duration-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+            <p className="text-xs text-gray-500">لن يظهر رقم الهاتف في صفحة الضيف.</p>
+          </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <div className="flex items-center space-x-reverse space-x-2">

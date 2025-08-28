@@ -4,6 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 
 type EventInfo = {
   id: string;
+  name?: string;
   startAtUtc: string;
   capacityMax: number;
   attendedCount: number;
@@ -101,6 +102,10 @@ export default function GuestTicket({ eventId }: { eventId: string }) {
   return (
     <div className="space-y-4">
       <div className="text-sm text-gray-500">موعد الضيف: {displayTime}</div>
+
+      {event?.name && (
+        <div className="text-lg font-medium text-center">{event.name}</div>
+      )}
 
       {isFull && (
         <div className="p-3 border rounded text-center">اكتمل العدد</div>

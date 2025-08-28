@@ -11,13 +11,26 @@ export async function GET(req: Request) {
     const eventId = searchParams.get("eventId");
     if (!eventId) return NextResponse.json({ error: "معرف مجموعة الضيوف مطلوب" }, { status: 400 });
 
-    const ev = await db.select({
-      id: events.id,
-      startAtUtc: events.startAtUtc,
-      capacityMax: events.capacityMax,
-      attendedCount: events.attendedCount,
-      ownerId: events.ownerId
-    }).from(events).where(eq(events.id, eventId)).limit(1);
+    let ev: any[] = [];
+    try {
+      ev = await db.select({
+        id: events.id,
+        name: (events as any).name,
+        startAtUtc: events.startAtUtc,
+        capacityMax: events.capacityMax,
+        attendedCount: events.attendedCount,
+        ownerId: events.ownerId
+      }).from(events).where(eq(events.id, eventId)).limit(1);
+    } catch {
+      // Fallback for databases without the name column yet
+      ev = await db.select({
+        id: events.id,
+        startAtUtc: events.startAtUtc,
+        capacityMax: events.capacityMax,
+        attendedCount: events.attendedCount,
+        ownerId: events.ownerId
+      }).from(events).where(eq(events.id, eventId)).limit(1);
+    }
     if (!ev.length) return NextResponse.json({ error: "مجموعة الضيوف غير موجودة" }, { status: 404 });
     const event = ev[0];
 
@@ -53,6 +66,7 @@ export async function GET(req: Request) {
       ok: true,
       event: {
         id: event.id,
+        name: (event as any).name ?? "",
         startAtUtc: event.startAtUtc,
         capacityMax: event.capacityMax,
         attendedCount: event.attendedCount,

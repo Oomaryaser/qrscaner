@@ -11,6 +11,8 @@ export const users = pgTable("users", {
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
   ownerId: uuid("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 200 }).notNull().default(""),
+  phone: varchar("phone", { length: 30 }),
   startAtUtc: timestamp("start_at_utc", { withTimezone: true }).notNull(),
   capacityMax: integer("capacity_max").notNull(),
   attendedCount: integer("attended_count").notNull().default(0),

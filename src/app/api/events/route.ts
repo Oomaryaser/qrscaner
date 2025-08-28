@@ -4,6 +4,7 @@ import { USER_COOKIE_NAME } from "@/lib/session";
 import { ADMIN_USER_ID } from "@/lib/admin";
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
+import { sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 function parseGmt3ToUtc(dateStr: string, timeStr: string): Date | null {
@@ -30,18 +31,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
     }
 
-    const { date, time, capacity } = await req.json();
+    const { date, time, capacity, name, phone } = await req.json();
     const cap = Number(capacity);
-    if (!date || !time || !Number.isFinite(cap) || cap <= 0) {
+    const trimmedName = (name ?? "").toString().trim();
+    const trimmedPhone = (phone ?? "").toString().trim();
+
+    if (!date || !time || !Number.isFinite(cap) || cap <= 0 || !trimmedName) {
       return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 });
     }
+
+    // Basic phone validation (optional) - allow +, digits, spaces, dashes, parentheses
+    if (trimmedPhone && !/^\+?[0-9\s\-()]{6,20}$/.test(trimmedPhone)) {
+      return NextResponse.json({ error: "رقم هاتف غير صالح" }, { status: 400 });
+    }
+
     const startAtUtc = parseGmt3ToUtc(date, time);
     if (!startAtUtc) {
       return NextResponse.json({ error: "تاريخ/وقت غير صالح" }, { status: 400 });
     }
 
     const id = randomUUID();
-    await db.insert(events).values({ id, ownerId: userId, capacityMax: cap, startAtUtc });
+    await db.insert(events).values({ id, ownerId: userId, capacityMax: cap, startAtUtc, name: trimmedName, phone: trimmedPhone || null });
     return NextResponse.json({ ok: true, id });
   } catch (e) {
     console.error(e);

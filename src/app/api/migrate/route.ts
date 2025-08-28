@@ -14,15 +14,41 @@ export async function GET() {
 
     // Try to add the missing columns
     try {
+      // Add missing columns to tickets
       await db.execute(sql`
         ALTER TABLE tickets
         ADD COLUMN IF NOT EXISTS scan_count INTEGER NOT NULL DEFAULT 0;
       `);
 
+      // Add missing columns to events
+      await db.execute(sql`
+        ALTER TABLE events
+        ADD COLUMN IF NOT EXISTS name VARCHAR(200) NOT NULL DEFAULT '';
+      `);
+      await db.execute(sql`
+        ALTER TABLE events
+        ADD COLUMN IF NOT EXISTS phone VARCHAR(30) NULL;
+      `);
+
+      // Re-check schema of both tables
+      const ticketsCols = await db.execute(sql`
+        SELECT column_name, data_type, is_nullable, column_default
+        FROM information_schema.columns
+        WHERE table_name = 'tickets'
+        ORDER BY ordinal_position;
+      `);
+      const eventsCols = await db.execute(sql`
+        SELECT column_name, data_type, is_nullable, column_default
+        FROM information_schema.columns
+        WHERE table_name = 'events'
+        ORDER BY ordinal_position;
+      `);
+
       return NextResponse.json({
         success: true,
         message: "Migration applied successfully",
-        columns: result.rows
+        ticketsColumns: ticketsCols.rows,
+        eventsColumns: eventsCols.rows
       });
     } catch (migrationError: any) {
       return NextResponse.json({
