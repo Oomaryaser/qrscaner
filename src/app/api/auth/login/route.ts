@@ -4,22 +4,19 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { USER_COOKIE_NAME } from "@/lib/session";
-import { ADMIN_PASSCODE, ADMIN_USER_ID, ADMIN_USERNAME } from "@/lib/admin";
+import { ADMIN_USER_ID, ADMIN_USERNAME, verifyAdminPasscode } from "@/lib/admin";
 
 export async function POST(req: Request) {
   try {
     const { username } = await req.json();
     const passcode = typeof username === "string" ? username.trim() : "";
 
-    // Only accept the single secret passcode
-    if (passcode !== ADMIN_PASSCODE) {
+    if (!verifyAdminPasscode(passcode)) {
       return NextResponse.json({ error: "رمز غير صالح" }, { status: 401 });
     }
 
-    // Ensure admin user exists (id must be a valid UUID per schema)
     const existing = await db.select().from(users).where(eq(users.id, ADMIN_USER_ID)).limit(1);
     if (!existing.length) {
-      // usernameNorm must be unique; use the fixed ID to avoid collisions
       await db.insert(users).values({ id: ADMIN_USER_ID, username: ADMIN_USERNAME, usernameNorm: ADMIN_USER_ID });
     }
 

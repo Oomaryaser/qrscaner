@@ -11,7 +11,6 @@ export const users = pgTable("users", {
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
   ownerId: uuid("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  // Stored in UTC
   startAtUtc: timestamp("start_at_utc", { withTimezone: true }).notNull(),
   capacityMax: integer("capacity_max").notNull(),
   attendedCount: integer("attended_count").notNull().default(0),
@@ -23,6 +22,7 @@ export const tickets = pgTable("tickets", {
   eventId: uuid("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
   scanned: boolean("scanned").notNull().default(false),
   scannedAt: timestamp("scanned_at", { withTimezone: true }),
+  scanCount: integer("scan_count").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

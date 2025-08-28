@@ -5,14 +5,14 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { USER_COOKIE_NAME } from "@/lib/session";
 
-export default async function ScanPage({ params }: { params: { id: string } }) {
-  const id = params.id;
+export default async function ScanPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const cookieManager = await cookies();
   const uid = cookieManager.get(USER_COOKIE_NAME)?.value;
-  if (!uid) return <div>غير مصرح. الرجاء تسجيل الدخول كمالك الفعالية.</div>;
+  if (!uid) return <div>غير مصرح. الرجاء تسجيل الدخول كمالك الضيف.</div>;
 
   const rows = await db.select().from(events).where(eq(events.id, id)).limit(1);
-  if (!rows.length) return <div>الفعالية غير موجودة</div>;
+  if (!rows.length) return <div>الضيف غير موجودة</div>;
   const ev = rows[0];
   if (ev.ownerId !== uid) return <div>غير مصرح. هذه الصفحة للمشرف فقط.</div>;
 

@@ -7,7 +7,6 @@ import { events } from "@/db/schema";
 import { randomUUID } from "crypto";
 
 function parseGmt3ToUtc(dateStr: string, timeStr: string): Date | null {
-  // date: YYYY-MM-DD, time: HH:mm in GMT+3
   const m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(dateStr || "");
   const t = /^([0-9]{2}):([0-9]{2})$/.exec(timeStr || "");
   if (!m || !t) return null;
@@ -16,7 +15,6 @@ function parseGmt3ToUtc(dateStr: string, timeStr: string): Date | null {
   const d = Number(m[3]);
   const hh = Number(t[1]);
   const mm = Number(t[2]);
-  // Convert GMT+3 to UTC by subtracting 3 hours
   const utcMs = Date.UTC(y, mo - 1, d, hh - 3, mm, 0, 0);
   return new Date(utcMs);
 }

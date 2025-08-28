@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { USER_COOKIE_NAME } from "@/lib/session";
 import { scanTicket } from "@/lib/scan";
-import Link from "next/link";
 
 export default async function AuthorizeTicketPage({ params }: { params: { id: string; ticketId: string } }) {
   const { id, ticketId } = params;
@@ -23,9 +22,9 @@ export default async function AuthorizeTicketPage({ params }: { params: { id: st
     detail = `الحضور: ${result.attendedCount} / ${result.capacityMax}`;
   } else if (result.status === "forbidden") {
     title = "غير مصرح";
-    detail = "يجب أن تكون مسجلاً كمالك الفعالية.";
+    detail = "يجب أن تكون مسجلاً كمالك الضيف.";
   } else if (result.status === "event_not_found") {
-    title = "الفعالية غير موجودة";
+    title = "الضيف غير موجودة";
   } else {
     title = "التذكرة غير موجودة";
   }

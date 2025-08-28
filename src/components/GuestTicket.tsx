@@ -100,7 +100,7 @@ export default function GuestTicket({ eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="text-sm text-gray-500">موعد الفعالية: {displayTime}</div>
+      <div className="text-sm text-gray-500">موعد الضيف: {displayTime}</div>
 
       {isFull && (
         <div className="p-3 border rounded text-center">اكتمل العدد</div>

@@ -9,10 +9,16 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const eventId = searchParams.get("eventId");
-    if (!eventId) return NextResponse.json({ error: "eventId مطلوب" }, { status: 400 });
+    if (!eventId) return NextResponse.json({ error: "معرف مجموعة الضيوف مطلوب" }, { status: 400 });
 
-    const ev = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
-    if (!ev.length) return NextResponse.json({ error: "الفعالية غير موجودة" }, { status: 404 });
+    const ev = await db.select({
+      id: events.id,
+      startAtUtc: events.startAtUtc,
+      capacityMax: events.capacityMax,
+      attendedCount: events.attendedCount,
+      ownerId: events.ownerId
+    }).from(events).where(eq(events.id, eventId)).limit(1);
+    if (!ev.length) return NextResponse.json({ error: "مجموعة الضيوف غير موجودة" }, { status: 404 });
     const event = ev[0];
 
     const cookieName = `ticket_${eventId}`;
@@ -20,10 +26,14 @@ export async function GET(req: Request) {
     const cid = cookieManager.get(cookieName)?.value;
 
     let tId = cid || null;
-    let tRow: { id: string; scanned: boolean } | null = null;
+    let tRow: { id: string; scanned: boolean; scanCount?: number } | null = null;
     if (tId) {
       const t = await db
-        .select({ id: tickets.id, scanned: tickets.scanned })
+        .select({
+          id: tickets.id,
+          scanned: tickets.scanned,
+          scanCount: tickets.scanCount
+        })
         .from(tickets)
         .where(eq(tickets.id, tId))
         .limit(1);
@@ -36,7 +46,7 @@ export async function GET(req: Request) {
       tId = randomUUID();
       await db.insert(tickets).values({ id: tId, eventId: eventId });
       setCookie = true;
-      tRow = { id: tId, scanned: false };
+      tRow = { id: tId, scanned: false, scanCount: 0 };
     }
 
     const res = NextResponse.json({
