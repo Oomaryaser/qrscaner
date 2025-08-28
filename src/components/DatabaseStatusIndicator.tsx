@@ -53,7 +53,7 @@ export default function DatabaseStatusIndicator() {
   const getStatusColor = () => {
     switch (status.status) {
       case 'connected':
-        return 'bg-green-500/20 border-green-500/30 text-green-100';
+        return '';
       case 'disconnected':
         return 'bg-red-500/20 border-red-500/30 text-red-100';
       case 'error':

@@ -12,7 +12,7 @@ export default function CreateEventForm() {
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState(def.date);
   const [time, setTime] = useState(def.time);
-  const [capacity, setCapacity] = useState<number>(50);
+  const [capacity, setCapacity] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [link, setLink] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export default function CreateEventForm() {
       const res = await fetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, time, capacity, name, phone }),
+        body: JSON.stringify({ date, time, capacity: Number(capacity), name, phone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "فشل إنشاء الضيف");
@@ -170,9 +170,10 @@ export default function CreateEventForm() {
               type="number"
               min={1}
               max={10000}
+              required
               className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl transition-all duration-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none"
               value={capacity}
-              onChange={(e) => setCapacity(Math.max(1, Number(e.target.value || 1)))}
+              onChange={(e) => setCapacity(e.target.value)}
               placeholder="أدخل عدد المقاعد"
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -199,7 +200,7 @@ export default function CreateEventForm() {
         )}
 
         <button 
-          disabled={loading} 
+          disabled={loading || !capacity || Number(capacity) < 1} 
           className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium transition-all duration-300 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl btn-hover-scale"
         >
           {loading ? (
