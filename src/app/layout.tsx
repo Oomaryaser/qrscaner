@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import DatabaseStatusIndicator from "@/components/DatabaseStatusIndicator";
+import UserMenu from "@/components/UserMenu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,7 +53,7 @@ export default function RootLayout({
                   <p className="text-sm text-gray-600">إدارة الفعاليات بكود QR</p>
                 </div>
               </div>
-              <div className="status-dot success"></div>
+              <UserMenu />
             </div>
           </div>
         </header>

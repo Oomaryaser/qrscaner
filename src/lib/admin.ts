@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export const ADMIN_PASSCODE = "match454429";
+export const ADMIN_PASSCODE = "1match2025faya";
 export const ADMIN_USER_ID = "11111111-1111-1111-1111-111111111111";
 export const ADMIN_USERNAME = "admin";
 

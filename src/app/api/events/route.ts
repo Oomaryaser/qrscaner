@@ -27,9 +27,8 @@ export async function POST(req: Request) {
     if (!userId) {
       return NextResponse.json({ error: "مطلوب تسجيل الدخول" }, { status: 401 });
     }
-    if (userId !== ADMIN_USER_ID) {
-      return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
-    }
+    // Allow any authenticated user (owner or admin) to create events
+    // Ownership will be set to the current userId below
 
     const { date, time, capacity, name, phone } = await req.json();
     const cap = Number(capacity);

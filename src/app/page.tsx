@@ -1,11 +1,12 @@
 import { getUserIdFromCookies } from "@/lib/session";
+import { db } from "@/db/client";
+import { events, users } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { ADMIN_USER_ID } from "@/lib/admin";
 import LoginForm from "@/components/LoginForm";
 import CreateEventForm from "@/components/CreateEventForm";
-import ResetAttendanceButton from "@/components/ResetAttendanceButton";
-import { db } from "@/db/client";
-import { events } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
+import { sql } from "drizzle-orm";
 
 export default async function Home() {
     const uid = await getUserIdFromCookies();
@@ -32,13 +33,31 @@ export default async function Home() {
         );
     }
 
-    let myEvents: { id: string; startAtUtc: Date; createdAt: Date; capacityMax: number; attendedCount: number; name?: string; phone?: string | null }[] = [];
+    const isOwner = uid === ADMIN_USER_ID;
+
+    let myEvents: { id: string; startAtUtc: Date; createdAt: Date; capacityMax: number; attendedCount: number; name?: string; phone?: string | null, ownerId?: string, ownerName?: string }[] = [];
     try {
-        myEvents = await db
-            .select({ id: events.id, startAtUtc: events.startAtUtc, createdAt: events.createdAt, capacityMax: events.capacityMax, attendedCount: events.attendedCount, name: (events as any).name, phone: (events as any).phone })
-            .from(events)
-            .where(eq(events.ownerId, uid))
-            .orderBy(desc(events.createdAt));
+        if (isOwner) {
+            // Owner: see all events with owner name
+            myEvents = await db.select({
+                id: events.id,
+                startAtUtc: events.startAtUtc,
+                createdAt: events.createdAt,
+                capacityMax: events.capacityMax,
+                attendedCount: events.attendedCount,
+                name: (events as any).name,
+                phone: (events as any).phone,
+                ownerId: events.ownerId,
+                ownerName: (users as any).username,
+            }).from(events).leftJoin(users, eq(users.id, events.ownerId)).orderBy(desc(events.createdAt));
+        } else {
+            // Admin: see only own events
+            myEvents = await db
+                .select({ id: events.id, startAtUtc: events.startAtUtc, createdAt: events.createdAt, capacityMax: events.capacityMax, attendedCount: events.attendedCount, name: (events as any).name, phone: (events as any).phone })
+                .from(events)
+                .where(eq(events.ownerId, uid))
+                .orderBy(desc(events.createdAt));
+        }
     } catch {
         myEvents = [];
     }
@@ -46,6 +65,13 @@ export default async function Home() {
     const totalAttended = myEvents.reduce((sum, ev) => sum + (ev.attendedCount || 0), 0);
     const totalCapacity = myEvents.reduce((sum, ev) => sum + (ev.capacityMax || 0), 0);
     const attendanceRate = totalCapacity > 0 ? Math.round((totalAttended / totalCapacity) * 100) : 0;
+
+    let admins: { id: string; username: string }[] = [];
+    if (isOwner) {
+        try {
+            admins = await db.select({ id: users.id, username: users.username }).from(users);
+        } catch {}
+    }
 
     return (
         <div className="space-y-8">
@@ -56,12 +82,12 @@ export default async function Home() {
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
                             لوحة التحكم
                         </h1>
-                        <p className="text-gray-600">إنشاء وإدارة فعالياتك بسهولة</p>
+                        <p className="text-gray-600">إنشاء وإدارة فعالياتك بسهولة {isOwner ? "(المالك يرى جميع الفعاليات)" : ""}</p>
                     </div>
                     <div className="flex items-center  space-x-4">
                         <div className="text-center">
                             <div className="text-2xl font-bold text-blue-600">{myEvents.length}</div>
-                            <div className="text-xs text-gray-500">ضيف</div>
+                            <div className="text-xs text-gray-500">{isOwner ? "كل الضيوف" : "ضيف"}</div>
                         </div>
                         <div className="w-px h-8 bg-gray-300"></div>
                         <div className="text-center">
@@ -119,7 +145,22 @@ export default async function Home() {
                 <CreateEventForm />
             </div>
 
-            {/* Events History */}
+           {isOwner && (
+               <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8">
+                 <h2 className="text-2xl font-bold text-gray-900 mb-4">المشرفون</h2>
+                 {admins.length === 0 ? (
+                   <div className="text-sm text-gray-500">لا يوجد مشرفون بعد</div>
+                 ) : (
+                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                     {admins.map(a => (
+                       <li key={a.id} className="text-sm text-gray-700 border rounded-lg px-3 py-2">{a.username}</li>
+                     ))}
+                   </ul>
+                 )}
+               </div>
+           )}
+
+           {/* Events History */}
             <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8">
                 <div className="flex items-center justify-between mb-6">
                     <div>
@@ -178,7 +219,7 @@ export default async function Home() {
                                                 {index + 1}
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-semibold text-gray-900 mb-1">{ev.name ? ev.name : `ضيف #${index + 1}`}</h3>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-1">{ev.name ? ev.name : `ضيف #${index + 1}`} {isOwner && ev.ownerName ? <span className="text-xs text-gray-500">— {ev.ownerName}</span> : null}</h3>
                                                 <div className="flex items-center  space-x-2">
                                                     {isActive && <span className="status-dot success animate-pulse-slow"></span>}
                                                     {isUpcoming && !isActive && <span className="status-dot warning"></span>}

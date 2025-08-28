@@ -82,6 +82,7 @@ export async function GET(req: Request) {
         capacityMax: event.capacityMax,
         attendedCount: event.attendedCount,
         ownerId: event.ownerId,
+        ownerName: (event as any).ownerName, // optional
       },
       ticket: tRow,
     });

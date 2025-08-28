@@ -17,7 +17,7 @@ export default function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: name }),
+        body: JSON.stringify({ passcode: name }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "فشل الدخول");
