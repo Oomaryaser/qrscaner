@@ -64,7 +64,7 @@ export default function LoginForm() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-reverse space-x-3 animate-slideIn">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center  space-x-3 animate-slideIn">
           <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
             <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -82,12 +82,12 @@ export default function LoginForm() {
         className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium transition-all duration-300 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl btn-hover-scale"
       >
         {loading ? (
-          <div className="flex items-center justify-center space-x-reverse space-x-2">
+          <div className="flex items-center justify-center  space-x-2">
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span>جاري التحقق...</span>
           </div>
         ) : (
-          <div className="flex items-center justify-center space-x-reverse space-x-2">
+          <div className="flex items-center justify-center  space-x-2">
             <span>تسجيل الدخول</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
