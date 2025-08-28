@@ -17,6 +17,7 @@ export default function GuestTicket({ eventId }: { eventId: string }) {
   const [event, setEvent] = useState<EventInfo | null>(null);
   const [ticketId, setTicketId] = useState<string | null>(null);
   const [scanned, setScanned] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [now, setNow] = useState(Date.now());
 
   const startAtMs = useMemo(() => (event ? new Date(event.startAtUtc).getTime() : null), [event]);
@@ -74,6 +75,22 @@ export default function GuestTicket({ eventId }: { eventId: string }) {
     return () => clearInterval(int);
   }, [ticketId]);
 
+  async function generateNewTicket() {
+    try {
+      setRefreshing(true);
+      const res = await fetch(`/api/tickets/ensure?eventId=${eventId}&new=1`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "تعذر إنشاء تذكرة جديدة");
+      setEvent(data.event);
+      setTicketId(data.ticket.id);
+      setScanned(Boolean(data.ticket.scanned));
+    } catch (e: any) {
+      setError(e.message ?? "تعذر إنشاء تذكرة جديدة");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   // Poll event stats to hide QR when full
   useEffect(() => {
     if (!event) return;
@@ -123,7 +140,16 @@ export default function GuestTicket({ eventId }: { eventId: string }) {
       )}
 
       {scanned && (
-        <div className="p-3 border rounded text-center text-green-600 text-xl">✔️ تم التحقق</div>
+        <div className="p-3 border rounded text-center text-green-600 text-xl space-y-3">
+          <div>✔️ تم التحقق</div>
+          <button
+            onClick={generateNewTicket}
+            disabled={refreshing}
+            className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-60"
+          >
+            {refreshing ? "...جارٍ الإنشاء" : "اضافة ضيف اخر"}
+          </button>
+        </div>
       )}
     </div>
   );

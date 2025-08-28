@@ -31,10 +31,10 @@ export default async function Home() {
     );
   }
 
-  let myEvents: { id: string; startAtUtc: Date; createdAt: Date; capacityMax: number; attendedCount: number }[] = [];
+  let myEvents: { id: string; startAtUtc: Date; createdAt: Date; capacityMax: number; attendedCount: number; name?: string; phone?: string | null }[] = [];
   try {
     myEvents = await db
-      .select({ id: events.id, startAtUtc: events.startAtUtc, createdAt: events.createdAt, capacityMax: events.capacityMax, attendedCount: events.attendedCount })
+      .select({ id: events.id, startAtUtc: events.startAtUtc, createdAt: events.createdAt, capacityMax: events.capacityMax, attendedCount: events.attendedCount, name: (events as any).name, phone: (events as any).phone })
       .from(events)
       .where(eq(events.ownerId, uid))
       .orderBy(desc(events.createdAt));
@@ -177,7 +177,7 @@ export default async function Home() {
                         {index + 1}
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">ضيف #{index + 1}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{ev.name ? ev.name : `ضيف #${index + 1}`}</h3>
                         <div className="flex items-center space-x-reverse space-x-2">
                           {isActive && <span className="status-dot success animate-pulse-slow"></span>}
                           {isUpcoming && !isActive && <span className="status-dot warning"></span>}
@@ -209,7 +209,7 @@ export default async function Home() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="bg-blue-50 rounded-xl p-3">
                       <div className="flex items-center space-x-reverse space-x-2 mb-1">
                         <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -223,11 +223,31 @@ export default async function Home() {
                     <div className="bg-green-50 rounded-xl p-3">
                       <div className="flex items-center space-x-reverse space-x-2 mb-1">
                         <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3 3a1 1 0 011-1h2a1 1 0 110 2H5v12h1a1 1 0 110 2H4a2 2 0 01-2-2V4a2 2 0 012-2h1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-sm font-medium text-green-900">الاسم</span>
+                      </div>
+                      <p className="text-sm text-green-700 break-words">{ev.name || '—'}</p>
+                    </div>
+
+                    <div className="bg-purple-50 rounded-xl p-3">
+                      <div className="flex items-center space-x-reverse space-x-2 mb-1">
+                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
                         </svg>
                         <span className="text-sm font-medium text-green-900">تاريخ الإنشاء</span>
                       </div>
                       <p className="text-sm text-green-700">{createdStr}</p>
+                    </div>
+
+                    <div className="bg-yellow-50 rounded-xl p-3">
+                      <div className="flex items-center space-x-reverse space-x-2 mb-1">
+                        <svg className="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M2 3a1 1 0 011-1h2a1 1 0 110 2H5v12h1a1 1 0 110 2H4a2 2 0 01-2-2V4a2 2 0 012-2h1z" />
+                        </svg>
+                        <span className="text-sm font-medium text-yellow-900">رقم الهاتف</span>
+                      </div>
+                      <p className="text-sm text-yellow-700 break-words">{ev.phone || '—'}</p>
                     </div>
                   </div>
 

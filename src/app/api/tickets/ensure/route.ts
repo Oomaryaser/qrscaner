@@ -11,6 +11,12 @@ export async function GET(req: Request) {
     const eventId = searchParams.get("eventId");
     if (!eventId) return NextResponse.json({ error: "معرف مجموعة الضيوف مطلوب" }, { status: 400 });
 
+    // If new=1 or new=true is provided, force generating a new ticket and updating the cookie
+    const forceNew = (() => {
+      const v = (searchParams.get("new") || "").toLowerCase();
+      return v === "1" || v === "true" || v === "yes";
+    })();
+
     let ev: any[] = [];
     try {
       ev = await db.select({
@@ -55,7 +61,12 @@ export async function GET(req: Request) {
     }
 
     let setCookie = false;
-    if (!tId) {
+    if (forceNew) {
+      tId = randomUUID();
+      await db.insert(tickets).values({ id: tId, eventId: eventId });
+      setCookie = true;
+      tRow = { id: tId, scanned: false, scanCount: 0 };
+    } else if (!tId) {
       tId = randomUUID();
       await db.insert(tickets).values({ id: tId, eventId: eventId });
       setCookie = true;
